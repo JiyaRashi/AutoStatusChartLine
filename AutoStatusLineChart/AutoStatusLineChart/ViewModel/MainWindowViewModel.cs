@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.IO;
 using AutoStatusLineChart.Extension;
 using System.Windows.Controls.DataVisualization.Charting;
+using Microsoft.Win32;
 
 namespace AutoStatusLineChart.ViewModel
 {
@@ -16,16 +17,21 @@ namespace AutoStatusLineChart.ViewModel
         private IList<QueryResultModel> _usersCq;
 
         private IList<CqGraphData> _cqGraphData;
+
+        private string fileOnlyName;
         public IList<string> _cqUsers { get; set; }
         public MainWindowViewModel()
         {
+            OpenDilog();
             _cqGraphData = new List<CqGraphData>();
             _cqUsers = new List<string>();
             _usersCq = GetAllQueryResult();
 
             _cqUsers = _usersCq.Select(x => x.Owner).Distinct().ToList();
 
-            CqGraphData= GetGraphData(_cqUsers, _usersCq);
+            CqGraphData = GetGraphData(_cqUsers, _usersCq);
+
+           
         }
         public IList<QueryResultModel> UsersCq
         {
@@ -48,7 +54,10 @@ namespace AutoStatusLineChart.ViewModel
         public IList<QueryResultModel> GetAllQueryResult()
         {
 
-            string path = $"Data/QueryResult.csv";
+            //string path = $"Data/QueryResult.csv";
+            string path = fileOnlyName;
+
+            
             var query =
 
                 File.ReadAllLines(path)
@@ -72,7 +81,7 @@ namespace AutoStatusLineChart.ViewModel
                     AssignedCount = cqData.Where(x => x.State == "Assigned" && x.Owner == cquser).Count(),
                     RealisedCount = cqData.Where(x => x.State == "Realised" && x.Owner == cquser).Count(),
                     RecoredCount = cqData.Where(x => x.State == "Recorded" && x.Owner == cquser).Count(),
-                    Validation_FailedCount= cqData.Where(x => x.State == "Validation_failed" && x.Owner == cquser).Count(),
+                    Validation_FailedCount = cqData.Where(x => x.State == "Validation_failed" && x.Owner == cquser).Count(),
 
                 });
             }
@@ -81,6 +90,17 @@ namespace AutoStatusLineChart.ViewModel
 
         }
 
-       
+        public void OpenDilog()
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog();
+            var newDestination = Environment.CurrentDirectory;
+
+            if (dialog.ShowDialog() == true)
+            {
+                fileOnlyName = dialog.FileName;
+               // fileOnlyName = Path.GetFileName(fullPath);
+                //File.Copy(fullPath, Path.Combine(newDestination, fileOnlyName));
+            }
+        }
     }
 }
